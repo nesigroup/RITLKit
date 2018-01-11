@@ -33,11 +33,18 @@
 }
 
 
+- (CGRect)borderRectForBounds:(CGRect)bounds
+{
+    CGRect rect = [super borderRectForBounds:bounds];
+    
+    return rect;
+}
+
+
 - (CGRect)placeholderRectForBounds:(CGRect)bounds
 {
     CGRect rect = [super placeholderRectForBounds:bounds];
     
-    //修改left
     rect.origin.x += self.placeholderLeftMargin;
     rect.size.width -= self.placeholderLeftMargin;
     
@@ -45,6 +52,23 @@
     rect.origin.y = MAX(0,(bounds.size.height - rect.size.height) / 2.0);
     
     return rect;
+}
+
+
+- (void)drawPlaceholderInRect:(CGRect)rect
+{
+    CGRect defaultPlaceholderRect = rect;
+    
+    if (UIDevice.currentDevice.systemVersion.floatValue < 11.0) {
+    
+        CGRect placeholderRect = [self placeholderRectForBounds:self.bounds];
+        
+        //修改纵坐标
+        defaultPlaceholderRect.origin.y = placeholderRect.origin.y;
+        defaultPlaceholderRect.size.height = placeholderRect.size.height;
+    }
+    
+    [super drawPlaceholderInRect:defaultPlaceholderRect];
 }
 
 
