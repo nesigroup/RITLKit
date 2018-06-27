@@ -88,8 +88,12 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 
+
+
 @interface NSString (RITLChecker)
 
+/// 是否为空字符串
+@property (nonatomic, assign, readonly)BOOL isEmpty;
 
 /**
  是否存在空格或者是否全是空格
@@ -97,6 +101,19 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly)BOOL ritl_hasSpaceWord;
 
+/// 是否为整数
+@property (nonatomic, assign, readonly)BOOL ritl_isInteger;
+
+/// 是否包含中文字
+@property (nonatomic, assign, readonly)BOOL ritl_containChinese;
+
+@end
+
+
+@interface NSString (RITLPredicated)
+
+/// 是否符合该正则表达式
+- (BOOL)ritl_evaluatePredicate:(NSString *)predicate;
 
 @end
 

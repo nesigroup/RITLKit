@@ -7,7 +7,7 @@
 //
 
 #import "RITLScrollPageViewController.h"
-#import "UIView+RITLFrameChanged.h"
+#import <RITLViewFrame/UIView+RITLFrameChanged.h>
 #import "NSArray+RITLExtension.h"
 #import "RITLUtility.h"
 
@@ -172,7 +172,6 @@
         
          [self.view addSubview:self.segmentBar];
     }
-    
     
     //初始化手势
     self.ritl_panGestureRecognizer = [UIPanGestureRecognizer new];

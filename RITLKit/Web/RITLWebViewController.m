@@ -8,7 +8,7 @@
 
 #import "RITLWebViewController.h"
 #import "RITLScriptMessageHandler.h"
-#import "UIView+RITLFrameChanged.h"
+#import <RITLViewFrame/UIView+RITLFrameChanged.h>
 #import "RITLUtility.h"
 #import "RITLWebScriptMessageHandler.h"
 #import <objc/runtime.h>
@@ -24,6 +24,7 @@
 
 @interface RITLWebViewController ()<WKScriptMessageHandler>
 
+@property (nonatomic, weak)UIBarButtonItem *backItem;
 @property (nonatomic, strong, readwrite) WKWebView *webView;
 
 @end
@@ -36,6 +37,11 @@
     if (self = [super init]) {
         
         self.autoTitle = true;
+        self.useLeftCloseItem = false;
+        self.useRightCloseItem = false;
+        self.closeWidth = 32;
+        self.leftImageInset = UIEdgeInsetsMake(0, -20, 0, 20);
+        self.rightImageInset = self.leftImageInset;
     }
     
     return self;
@@ -59,7 +65,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.view.backgroundColor = [UIColor orangeColor];
+    self.view.backgroundColor = [UIColor whiteColor];
+    self.backItem = self.navigationItem.leftBarButtonItems.firstObject;
     
     if (!RITL_iOS_Version_GreaterThanOrEqualTo(11.0)) {
         
@@ -127,7 +134,7 @@
         
         [self requestUrl];
     }
-
+    
 }
 
 
@@ -198,7 +205,6 @@
 
     }else {
         
-//        [super actionBackItemInNavigationBar];
     }
 }
 
@@ -313,7 +319,17 @@
         //进行赋值
         objc_setAssociatedObject(self.webView, _cmd, @(hasBackWeb), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         
-        self.navigationItem.rightBarButtonItem = hasBackWeb ?  [[UIBarButtonItem alloc]initWithImage:/*@"关闭"*/self.closeImage style:UIBarButtonItemStylePlain target:self action:@selector(close)] : nil;
+        if (self.useLeftCloseItem) {
+            
+            self.navigationItem.leftBarButtonItems = [self backItemsWithCanGoBack:hasBackWeb left:true];
+            
+        }
+        
+        if(self.useRightCloseItem){
+            
+            self.navigationItem.rightBarButtonItems = [self backItemsWithCanGoBack:hasBackWeb left:false];
+        }
+        
     }
     
     // 进度条展示
@@ -335,41 +351,68 @@
 
 
 
-- (NSArray <UIBarButtonItem *>*)backItemsWithCanGoBack:(BOOL)canGoBack {
+- (NSArray <UIBarButtonItem *>*)backItemsWithCanGoBack:(BOOL)canGoBack left:(BOOL)isLeft{
     
     //获得back
-    UIBarButtonItem *backItem = self.navigationItem.leftBarButtonItems.firstObject;
+    UIBarButtonItem *backItem = self.backItem;
     
-    if (canGoBack) {
+    if (self.useLeftCloseItem && isLeft) {//左侧
+ 
+        if (canGoBack) {
+            
+            UIBarButtonItem *closeItem = [[UIBarButtonItem alloc]initWithImage:/*@"关闭"*/self.leftCloseImage style:UIBarButtonItemStylePlain target:self action:@selector(close:)];
+            
+            closeItem.imageInsets = self.leftImageInset;
+            closeItem.width = self.closeWidth;
+            
+            if (backItem) { return @[backItem,closeItem]; }//存在默认返回
+            
+            return @[closeItem];//不存在默认返回
+        }
         
-        UIBarButtonItem *closeItem = [[UIBarButtonItem alloc]initWithImage:/*@"关闭"*/self.closeImage style:UIBarButtonItemStylePlain target:self action:@selector(close)];
+        if (backItem) {  return @[backItem]; }//不能返回，只返回默认返回按钮
         
-        closeItem.imageInsets = UIEdgeInsetsMake(0, -20, 0, 20);
-        closeItem.width = 32;
-        
-        return @[backItem,closeItem];
+        return nil;
     }
     
-    return @[backItem];
     
+    if(self.useRightCloseItem && !isLeft){//右侧
+        
+        if (!canGoBack) { return nil; }
+        
+        UIBarButtonItem *closeItem = [[UIBarButtonItem alloc]initWithImage:/*@"关闭"*/self.rightCloseImage style:UIBarButtonItemStylePlain target:self action:@selector(close:)];
+        
+        closeItem.imageInsets = self.rightImageInset;
+        closeItem.width = self.closeWidth;
+        
+        return @[closeItem];
+    }
+
+    return backItem ? @[backItem] : nil;
 }
 
 
-- (void)close
+- (void)close:(UIBarButtonItem *)sender
 {
-    [self.navigationController popViewControllerAnimated:true];
-}
-
-
-
-- (UIImage *)closeImage
-{
-    if (!_closeImage) {
+    if ([self.navigationItem.leftBarButtonItems containsObject:sender]) {//表示leftClose
         
-        return [UIImage imageNamed:@"web_close"];
+        if (self.leftCloseButtonTap) { self.leftCloseButtonTap(self, sender); return; }
+        
+        if([self.webView canGoBack]){//返回主页
+            
+            [self.webView goToBackForwardListItem:self.webView.backForwardList.backList.firstObject];
+        }
     }
     
-    return _closeImage;
+    if  ([self.navigationItem.rightBarButtonItems containsObject:sender]){//表示右侧
+        
+        if (self.rightCloseButtonTap) { self.rightCloseButtonTap(self, sender); return; }
+        
+        if([self.webView canGoBack]){//返回主页
+            
+            [self.webView goToBackForwardListItem:self.webView.backForwardList.backList.firstObject];
+        }
+    }
 }
 
 
@@ -448,6 +491,26 @@
 {
     
 }
+
+#pragma mark - closeItem
+
+
+
+
+
+#pragma mark - Deprecated
+
+- (UIImage *)closeImage
+{
+    return self.rightCloseImage;
+}
+
+
+- (void)setCloseImage:(UIImage *)closeImage
+{
+    self.rightCloseImage = closeImage;
+}
+
 
 @end
 

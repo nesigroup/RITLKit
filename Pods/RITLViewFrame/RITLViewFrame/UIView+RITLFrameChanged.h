@@ -10,8 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// 边界的方法
-@interface UIView (RITLFrameChanged)
+@protocol RITLFrameChanged <NSObject>
 
 @property (nonatomic, assign)CGPoint ritl_originPoint;
 @property (nonatomic, assign)CGSize  ritl_size;
@@ -21,6 +20,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign)CGFloat ritl_width;
 @property (nonatomic, assign)CGFloat ritl_height;
+
+@end
+
+
+
+/// 边界的方法
+@interface UIView (RITLFrameChanged)<RITLFrameChanged>
+
 
 @property (nonatomic, assign)CGFloat ritl_centerX;
 @property (nonatomic, assign)CGFloat ritl_centerY;
@@ -65,8 +72,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign)CGFloat ritl_contentSizeHeight;
 
 
-- (void)setTk_contentOffSetX:(CGFloat)ritl_contentOffSetX animated:(BOOL)animated;
-- (void)setTk_contentOffSetY:(CGFloat)ritl_contentOffSetY animated:(BOOL)animated;
+- (void)setRitl_contentOffSetX:(CGFloat)ritl_contentOffSetX animated:(BOOL)animated;
+- (void)setRitl_contentOffSetY:(CGFloat)ritl_contentOffSetY animated:(BOOL)animated;
 
 @end
 
@@ -79,6 +86,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// 修改frame返回自己
 - (instancetype)viewChangedFrame:(CGRect)frame;
+
+@end
+
+
+
+
+@interface CALayer (RITLFrameChanged) <RITLFrameChanged>
+
+@property (nonatomic, assign)CGFloat ritl_anchorPointX;
+@property (nonatomic, assign)CGFloat ritl_anchorPointY;
 
 @end
 

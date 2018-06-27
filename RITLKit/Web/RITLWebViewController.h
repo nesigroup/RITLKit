@@ -20,12 +20,10 @@ NS_ASSUME_NONNULL_BEGIN
 /// 注册的名字
 @property (nonatomic, copy) NSString *name;
 
-
 @end
 
-
 typedef void(^RITLWebControllerConfigHandler)(RITLWebViewController *viewController);
-
+typedef void(^RITLWebControllerTapHandler)(RITLWebViewController *viewController,UIBarButtonItem *item);
 
 
 /// 网页加载控制器
@@ -50,8 +48,7 @@ typedef void(^RITLWebControllerConfigHandler)(RITLWebViewController *viewControl
 /// 是否抓取webView的title，默认为true
 @property (nonatomic, assign) BOOL autoTitle;
 
-/// 关闭的itemButton的图片
-@property (nonatomic, strong) UIImage *closeImage;
+
 
 /// 进度条视图
 @property (nonatomic, strong) UIProgressView *progressView;
@@ -74,6 +71,42 @@ typedef void(^RITLWebControllerConfigHandler)(RITLWebViewController *viewControl
 
 /// 加载url
 - (void)requestUrl;
+
+
+
+#pragma mark - item
+
+/// default : 32
+@property (nonatomic, assign)CGFloat closeWidth;
+
+
+/// 默认为false
+@property (nonatomic, assign)BOOL useRightCloseItem;
+/// 关闭存在于右侧导航栏的image
+@property (nonatomic, strong, nullable) UIImage *rightCloseImage;
+/// rightCloseButtondidTap
+@property (nonatomic, copy, nullable)RITLWebControllerTapHandler rightCloseButtonTap;
+/// 默认(0,20,0,20)
+@property (nonatomic, assign)UIEdgeInsets rightImageInset;
+
+/// 默认为false
+@property (nonatomic, assign)BOOL useLeftCloseItem;
+/// 关闭存在与back右侧栏的image
+@property (nonatomic, strong, nullable) UIImage *leftCloseImage;
+/// leftCloseButtondidTap
+@property (nonatomic, copy, nullable)RITLWebControllerTapHandler leftCloseButtonTap;
+/// 默认(0,20,0,20)
+@property (nonatomic, assign)UIEdgeInsets leftImageInset;
+
+
+
+#pragma mark - Deprecated
+
+/**
+ 关闭的itemButton的图片
+ 即将废弃 --- 使用rightCloseImage
+ */
+@property (nonatomic, strong) UIImage *closeImage;
 
 @end
 

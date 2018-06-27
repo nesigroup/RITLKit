@@ -19,7 +19,7 @@
     NSMutableAttributedString *attibuteResult = [[NSMutableAttributedString alloc]initWithString:@""];
     
     //自身文字
-    NSString * handleString = [NSString stringWithFormat:@"%@ ",self];
+    NSString * handleString = [NSString stringWithFormat:@"%@",self];
     
     NSMutableAttributedString * attributeString = [[NSMutableAttributedString alloc]initWithString:handleString attributes:attributes];
     
@@ -30,13 +30,7 @@
     NSAttributedString * imageAttributeString = [NSAttributedString attributedStringWithAttachment:textAttachement];
     NSMutableAttributedString *imageHandler = [[NSMutableAttributedString alloc]initWithAttributedString:imageAttributeString];
     [imageHandler addAttribute:NSUnderlineColorAttributeName value:[UIColor clearColor] range:NSMakeRange(0, imageHandler.length)];
-    
-//    //替换
-//    [attributeString replaceCharactersInRange:[handleString rangeOfString:@"Y"] withAttributedString:imageAttributeString];
-//
-//    [attributeString addAttribute:NSBaselineOffsetAttributeName value:value range:[handleString rangeOfString:@"Y"]];
-//
-//    [attributeString addAttribute:NSUnderlineColorAttributeName value:[UIColor clearColor] range:NSMakeRange(0, attributeString.length)];
+    [imageHandler addAttribute:NSBaselineOffsetAttributeName value:value range:NSMakeRange(0, imageHandler.length)];
     
     //拼接
     [attibuteResult appendAttributedString:attributeString];
@@ -76,6 +70,11 @@
 
 -(NSURL *)ritl_url
 {
+    if (self.ritl_containChinese) {
+        
+       return [NSURL URLWithString:[self stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]];
+    }
+    
     return [NSURL URLWithString:self];
 }
 
@@ -262,6 +261,7 @@
 
 @implementation NSString (RITLChecker)
 
+
 - (BOOL)ritl_hasSpaceWord
 {
     if (!self || [self isEqualToString:@""]) {  return false; }
@@ -276,4 +276,50 @@
 }
 
 
+
+- (BOOL)ritl_isInteger
+{
+    NSScanner* scan = [NSScanner scannerWithString:self];
+    
+    int val;
+    
+    return[scan scanInt:&val] && [scan isAtEnd];
+}
+
+
+
+- (BOOL)ritl_containChinese
+{
+    for(int i = 0; i< [self length]; i++)
+    {
+        unichar a = [self characterAtIndex:i];
+        
+        if( a >= 0x4E00 && a <= 0x9FA5){
+            
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+
+- (BOOL)isEmpty
+{
+    return [self isEqualToString:@""];
+}
+
 @end
+
+
+@implementation NSString (RITLPredicated)
+
+- (BOOL)ritl_evaluatePredicate:(NSString *)predicate
+{
+    NSPredicate *nspredicate = [NSPredicate predicateWithFormat:predicate];
+    
+    return [nspredicate evaluateWithObject:self];
+}
+
+@end
+

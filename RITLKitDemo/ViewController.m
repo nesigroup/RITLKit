@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "RITLKit.h"
+#import <RITLViewFrame/UIView+RITLFrameChanged.h>
 #import <Masonry.h>
 
 @interface ViewController ()
@@ -52,7 +53,21 @@
     search.placeholderColor = UIColor.whiteColor;
 //    [self.view addSubview:search];
     
-    self.view.ritl_view.add(self.searchController.searchBar).add(search);
+    self.view.ritl_view.add(self.searchController.searchBar).add(search).remove(search);
+    
+    
+    UIButton *button = [[UIButton alloc]initWithFrame:CGRectMake(0, 190, 60, 30)];
+    button.ritl_normalTitle = @"Hello";
+//    button.ritl_normalBackgroundImage = UIColor.blueColor.ritl_image;
+    button.ritl_normalTitleColor = UIColor.whiteColor;
+//    button.ritl_normalImage = UIColor.whiteColor.ritl_image;
+//    button.ritl_normalBackgroundImage
+    
+    self.view.ritl_view.add(button);
+    
+    
+    NSLog(@"size = %@",@(@"ritl_iphonex".ritl_image.ritl_sizeWithKB));
+    
     
 //    UILabel *label = [UILabel new];
 //    label.text = @"小黑丹";
@@ -87,7 +102,7 @@
 
 - (void)dealloc
 {
-    NSInteger i = 0;
+//    NSInteger i = 0;
 }
 
 
