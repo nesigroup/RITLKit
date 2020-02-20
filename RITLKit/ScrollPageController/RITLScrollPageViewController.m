@@ -64,10 +64,7 @@
 
 -(NSInteger)currentIndex
 {
-    if (!self.currentViewController) {
-        
-        return NSNotFound;
-    }
+    if (!self.currentViewController) { return NSNotFound; }
     
     return [self.contentViewControllers indexOfObject:self.currentViewController];
 }
@@ -149,6 +146,7 @@
 
 /// 标志动画是否完成
 @property (nonatomic, assign)BOOL translateFinish;
+@property (nonatomic, strong, readwrite) UIView *bottomView;
 
 @end
 
@@ -156,9 +154,16 @@
 
 @implementation RITLScrollHorizontalPageViewController
 
-
-- (UIPageViewControllerNavigationOrientation)orientation
+- (instancetype)init
 {
+    if (self = [super init]) {
+        self.bottomEdgeInsets = UIEdgeInsetsZero;
+    }
+    return self;
+}
+
+
+- (UIPageViewControllerNavigationOrientation)orientation {
     return UIPageViewControllerNavigationOrientationHorizontal;
 }
 
@@ -169,9 +174,12 @@
     [super viewDidLoad];
     
     if (!self.segmentBar.hidden) {
-        
          [self.view addSubview:self.segmentBar];
     }
+    
+    [self.view addSubview:self.bottomView];
+    
+    self.translateFinish = true;
     
     //初始化手势
     self.ritl_panGestureRecognizer = [UIPanGestureRecognizer new];
@@ -179,17 +187,14 @@
     
     //获得需要失败的手势
     if (!self.popPanGestureRecognizer && self.navigationController) {
-        
         self.popPanGestureRecognizer = self.navigationController.interactivePopGestureRecognizer;
     }
     
-    else if (self.popPanGestureRecognizer  && self.parentViewController.navigationController) {
-        
+    else if (!self.popPanGestureRecognizer  && self.parentViewController.navigationController) {
         self.popPanGestureRecognizer = self.parentViewController.navigationController.interactivePopGestureRecognizer;
     }
     
     if (self.popPanGestureRecognizer) {
-        
          [self.ritl_panGestureRecognizer requireGestureRecognizerToFail:self.popPanGestureRecognizer];//自定义的高于导航栏
     }
     
@@ -210,6 +215,8 @@
     [super viewDidLayoutSubviews];
     
     self.segmentBar.ritl_width = self.ritl_width;
+    self.bottomView.ritl_width = self.ritl_width - ABS(self.bottomEdgeInsets.left) - ABS(self.bottomEdgeInsets.right);
+    self.bottomView.ritl_originY = self.segmentBar.hidden ? 0 : self.segmentBar.ritl_height;
     
     //选出底部视图
     UIView *scrollView = [[self.view.subviews ritl_filter:^BOOL(__kindof UIView * _Nonnull view) {
@@ -221,8 +228,9 @@
 //    BOOL hidden = self.segmentBar.hidden;
     
     //重置height
-    scrollView.ritl_originY = self.segmentBar.hidden ? 0 : self.segmentBar.ritl_height;
-    scrollView.ritl_height = self.ritl_height - (self.segmentBar.hidden ? 0 : self.segmentBar.ritl_height);
+    scrollView.ritl_originY = self.segmentBar.hidden ? 0 : (self.bottomView.hidden ?  self.segmentBar.ritl_height : self.segmentBar.ritl_height + self.bottomView.ritl_height);
+    
+    scrollView.ritl_height = self.ritl_height - (self.segmentBar.hidden ? 0 : (self.bottomView.hidden ?  self.segmentBar.ritl_height : self.segmentBar.ritl_height + self.bottomView.ritl_height));
 }
 
 
@@ -240,15 +248,12 @@
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
     UIPanGestureRecognizer *recognizer = (UIPanGestureRecognizer *)gestureRecognizer;
-    
     CGPoint translate = [recognizer translationInView:gestureRecognizer.view];
 
 //    NSLog(@"translate = %@",NSStringFromCGPoint(translate));
     
     if (translate.x <= 0) {//到达最右侧
-        
         return self.currentIndex == self.contentViewControllers.count - 1 && self.translateFinish;
-        
     }
     
     return self.currentIndex == 0 && self.translateFinish;
@@ -268,10 +273,8 @@
     [super setCurrentViewController:currentViewController];
     
     if (self.ritl_delegate && [self.ritl_delegate respondsToSelector:@selector(ritl_scrollHorizontalPageViewController:willToIndex:)]) {
-        
         [self.ritl_delegate ritl_scrollHorizontalPageViewController:self willToIndex:self.currentIndex];
     }
-    
     
     //变化segment
     [self.segmentBar changedSelectedOnlyWithIndex:self.currentIndex];
@@ -304,6 +307,18 @@
     return _segmentBar;
 }
 
+- (UIView *)bottomView {
+    
+    if (!_bottomView) {
+        
+        _bottomView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 0, 1)];
+        _bottomView.backgroundColor = RITLColorSimpleFromIntRBG(245);
+        _bottomView.hidden = true;
+        
+    }
+    return _bottomView;
+}
+
 
 
 #pragma mark - LLSegmentBarDelegate
@@ -311,7 +326,6 @@
 {
     //获得将要去的viewController
     UIViewController *toViewController = [self.contentViewControllers ritl_safeObjectAtIndex:toIndex];
-  
     self.currentViewController = toViewController;
 }
 
@@ -335,7 +349,6 @@
     self.translateFinish = true;
     
     if (self.ritl_delegate && [self.ritl_delegate respondsToSelector:@selector(ritl_scrollHorizontalPageViewController:willToIndex:)]) {
-        
         [self.ritl_delegate ritl_scrollHorizontalPageViewController:self willToIndex:self.currentIndex];
     }
     
@@ -345,30 +358,19 @@
 }
 
 
-
-
-
 @end
-
 
 
 
 @implementation RITLScrollVerticalPageViewController
 
 
-- (UIPageViewControllerNavigationOrientation)orientation
-{
+- (UIPageViewControllerNavigationOrientation)orientation {
     return UIPageViewControllerNavigationOrientationVertical;
 }
 
 
 @end
-
-
-
-
-
-
 
 
 
@@ -417,23 +419,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @implementation RITLScrollPageViewController (UIPageViewControllerDataSource)
 
 //前一页
@@ -473,7 +458,6 @@
 
 
 
-
 @implementation RITLScrollPageViewController (UIPageViewControllerDelegate)
 
 - (void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray<UIViewController *> *)previousViewControllers transitionCompleted:(BOOL)completed
@@ -483,19 +467,5 @@
     
 }
 
-
 @end
 
-
-
-
-//@interface UIQueuingScrollView (ETScrollHorizontalPageViewController)
-//
-//@end
-//
-//
-//@implementation UIQueuingScrollView(ETScrollHorizontalPageViewController)
-//
-//
-//
-//@end

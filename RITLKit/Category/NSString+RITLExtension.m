@@ -8,7 +8,7 @@
 
 #import "NSString+RITLExtension.h"
 #import <CommonCrypto/CommonDigest.h>
-#import "NSObject+RITLExtension.h"
+//#import "NSObject+ RITLExtension.h"
 
 
 @implementation NSString (RITLImageAttributeString)
@@ -58,6 +58,25 @@
     for(NSInteger i = 0; i < CC_MD5_DIGEST_LENGTH; i++){
         
         [digest appendFormat:@"%02x",result[i]];
+    }
+    
+    return digest;
+}
+
+
+-(NSString *)ritl_md5ForUpper32Bate
+{
+    const char *input = self.UTF8String;//转成C字符串
+    unsigned char result[CC_MD5_DIGEST_LENGTH];//存放结果
+    
+    CC_MD5(input, (CC_LONG)strlen(input), result);//进行加密
+    
+    // 拼接成字符串
+    NSMutableString *digest = [NSMutableString stringWithCapacity:CC_MD5_DIGEST_LENGTH * 2];
+    
+    for(NSInteger i = 0; i < CC_MD5_DIGEST_LENGTH; i++){
+        
+        [digest appendFormat:@"%02X",result[i]];
     }
     
     return digest;
@@ -147,10 +166,16 @@
     
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:self.integerValue];
 
-    NSDateFormatter *formatter = [NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
+    NSDateFormatter *formatter = ({
+        
+        NSDateFormatter *formatter = NSDateFormatter.new;
+        formatter.dateFormat = @"yyyy-MM-dd";
+        formatter;
+        
+    })/*[NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
         
         object.dateFormat = @"yyyy-MM-dd";
-    }];
+    }]*/;
     
     
     //设置转换
@@ -167,11 +192,14 @@
     
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:self.integerValue];
     
-    NSDateFormatter *formatter = [NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
-        
-        object.dateFormat = @"yyyy-MM-dd HH:mm:ss";
-    }];
+    NSDateFormatter *formatter = NSDateFormatter.new;
+    formatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
     
+//    [NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
+//
+//        object.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+//    }];
+//
     
     //设置转换
     return [formatter stringFromDate:date];
@@ -187,17 +215,28 @@
     
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:self.integerValue];
     
-    NSDateFormatter *formatter1 = [NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
+    NSDateFormatter *formatter1 = ({
+        
+        NSDateFormatter *formatter = NSDateFormatter.new;
+        formatter.dateFormat = @"yyyy-MM-dd HH:mm";
+        formatter;
+        
+    })/*[NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
         
         object.dateFormat = @"yyyy-MM-dd HH:mm";
         
-    }];
+    }]*/;
     
-    NSDateFormatter *formatter2 = [NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
+    NSDateFormatter *formatter2 = ({
+        
+        NSDateFormatter *formatter = NSDateFormatter.new;
+        formatter.dateFormat = @"yyyy-MM-dd";
+        formatter;
+    })/*[NSDateFormatter ritl_object:^(__kindof NSDateFormatter *  _Nonnull object) {
         
         object.dateFormat = @"yyyy-MM-dd";
         
-    }];
+    }]*/;
     
     //获得字符串
     NSString *date1 = [formatter1 stringFromDate:date];
@@ -280,9 +319,7 @@
 - (BOOL)ritl_isInteger
 {
     NSScanner* scan = [NSScanner scannerWithString:self];
-    
     int val;
-    
     return[scan scanInt:&val] && [scan isAtEnd];
 }
 
@@ -293,13 +330,10 @@
     for(int i = 0; i< [self length]; i++)
     {
         unichar a = [self characterAtIndex:i];
-        
         if( a >= 0x4E00 && a <= 0x9FA5){
-            
             return true;
         }
     }
-    
     return false;
 }
 
@@ -320,6 +354,37 @@
     
     return [nspredicate evaluateWithObject:self];
 }
+
+@end
+
+
+@implementation NSString (RITLNumber)
+
+- (NSString *)ritl_limitLettersMaxLength:(NSInteger)maxLength
+{
+    if (maxLength < 0 || self.length <= maxLength) { return self; }
+    
+    //开始截取
+    NSString *sub = [self substringToIndex:maxLength];
+    
+    return [sub stringByAppendingString:@"..."];
+    
+}
+
+
+- (NSString *)ritl_unitNumber
+{
+    NSInteger count = self.integerValue;
+    
+    if (count <= 999) { return self; }
+    
+    if (count > 999 && count < 10000){
+        return [NSString stringWithFormat:@"%.1fk",self.floatValue];
+    }
+    
+    return [NSString stringWithFormat:@"%.1fw",self.floatValue];
+}
+
 
 @end
 

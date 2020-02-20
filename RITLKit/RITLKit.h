@@ -22,7 +22,7 @@
 #import "AppleReachability.h"
 
 
-#import "RITLButtonItem.h"
+#import "RITLItemButton.h"
 #import "RITLSearchView.h"
 #import "RITLSearchTextField.h"
 #import "RITLImagePickerController.h"
@@ -37,11 +37,9 @@
 #import "UIColor+RITLExtension.h"
 #import "UIImage+RITLExtension.h"
 #import "UIButton+RITLKit.h"
-#import "NSObject+RITLExtension.h"
 #import "NSString+RITLExtension.h"
 #import "UIControl+RITLBlockButton.h"
 #import "NSDictionary+RITLExtension.h"
-#import "UISearchBar+RITLCustomColor.h"
 #import "UITableView+RITLCellRegister.h"
 #import "UIViewController+RITLExtension.h"
 #import "CAGradientLayer+RITLGradientLayer.h"
@@ -51,5 +49,9 @@
 #import "RITLWebViewController.h"
 #import "RITLScriptMessageHandler.h"
 #import "RITLWebScriptMessageHandler.h"
+
+
+//TODO: Deprecated
+//#import "RITLButtonItem.h"
 
 #endif /* RITLTool_h */

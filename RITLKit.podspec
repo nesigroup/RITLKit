@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = 'RITLKit'
-  s.version      = '0.3.9'
+  s.version      = '2.0.3'
   s.summary      = "The commonly Used Objective-C RITLKit."
 
   s.homepage     = "https://github.com/RITL/RITLKit"
@@ -67,5 +67,4 @@ Pod::Spec.new do |s|
     ss.dependency 'RITLKit/Category'
     ss.dependency 'RITLKit/Utility'
   end
-
 end
